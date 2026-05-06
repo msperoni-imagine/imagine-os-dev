@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Company OS",
+  title: "IMAGINE OS",
   description: "PSA para agencias",
 };
 
