@@ -1,0 +1,2 @@
+-- No-op: la tabla ya se crea como "personas" en 001_create_tables.sql
+-- Este rename de equipo → personas ya no es necesario.

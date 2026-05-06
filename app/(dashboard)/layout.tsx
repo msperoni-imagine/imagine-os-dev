@@ -1,0 +1,34 @@
+import { Suspense } from 'react'
+import { redirect } from 'next/navigation'
+import { Sidebar } from '@/components/sidebar'
+import { Header } from '@/components/header'
+import { getPersonaAutenticada } from '@/lib/supabase/auth-helpers'
+
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const persona = await getPersonaAutenticada()
+
+  // Si el usuario está logueado pero su email no está en personas → sin acceso
+  if (!persona) {
+    redirect('/sin-acceso')
+  }
+
+  const rolNombre = persona.rol.nombre
+
+  return (
+    <div className="flex h-screen overflow-hidden">
+      <Suspense>
+        <Sidebar rolNombre={rolNombre} />
+      </Suspense>
+      <div className="ml-[220px] flex-1 flex flex-col min-h-0 min-w-0">
+        <Header />
+        <main className="flex-1 min-h-0 bg-[#F9FAFB] p-6 overflow-auto">
+          {children}
+        </main>
+      </div>
+    </div>
+  )
+}
