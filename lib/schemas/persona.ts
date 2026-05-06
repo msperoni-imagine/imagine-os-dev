@@ -17,7 +17,9 @@ export const personaSchema = z.object({
   ciudad_id: z.string().min(1, 'Selecciona una ciudad'),
   oficina_id: z.string(),
   fecha_incorporacion: z.string().min(1, 'La fecha de incorporación es obligatoria'),
-  email_corporativo: z.string(),
+  email_corporativo: z
+    .email('Introduce un email válido')
+    .min(1, 'El email corporativo es obligatorio'),
   email_personal: z.string(),
   telefono: z.string(),
   modalidad_trabajo: z.string(),

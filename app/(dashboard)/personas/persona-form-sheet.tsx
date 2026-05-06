@@ -513,8 +513,15 @@ export function PersonaFormSheet({
 
           {/* Contacto */}
           <div className="space-y-1.5">
-            <Label htmlFor="email_corporativo">Email corporativo</Label>
-            <Input id="email_corporativo" type="email" placeholder="nombre@empresa.com" {...register('email_corporativo')} />
+            <Label htmlFor="email_corporativo">Email corporativo *</Label>
+            <Input
+              id="email_corporativo"
+              type="email"
+              placeholder="nombre@empresa.com"
+              aria-invalid={!!errors.email_corporativo}
+              {...register('email_corporativo')}
+            />
+            <FieldError message={errors.email_corporativo?.message} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
