@@ -59,7 +59,7 @@ export default async function DashboardPage() {
     <div>
       <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
       <p className="mt-0.5 text-sm text-muted-foreground">
-        Vista general de Company OS
+        Vista general de IMAGINEOS
       </p>
 
       {/* KPI Cards */}
