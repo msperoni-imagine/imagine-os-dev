@@ -2,7 +2,7 @@ import 'server-only'
 import { createClient } from './server'
 import type { PersonaAutenticada } from './auth-helpers'
 
-const ROLES_MULTI_EMPRESA = ['Fundador', 'Socio', 'Administrador'] as const
+const ROLES_MULTI_EMPRESA = ['Fundador', 'Socio', 'Administrador', 'Desarrollador'] as const
 const ROLES_EMPRESA_COMPLETA = ['Director', 'Coordinador'] as const
 
 /**

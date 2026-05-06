@@ -143,6 +143,64 @@ export async function reactivarUsuario(personaId: string): Promise<ActionResult>
 }
 
 /**
+ * Reenviar invitación: vuelve a mandar el email de invitación a una persona
+ * que ya tiene cuenta auth pero aún no ha confirmado/establecido contraseña.
+ */
+export async function reenviarInvitacion(personaId: string): Promise<ActionResult> {
+  const autorizado = await getUsuarioConNivel(NIVELES_ADMIN)
+  if (!autorizado) return { success: false, error: ERROR_SIN_PERMISO }
+
+  const supabase = await createClient()
+  const { data: persona, error: fetchErr } = await supabase
+    .from('personas')
+    .select('id, email_corporativo, auth_user_id, persona')
+    .eq('id', personaId)
+    .single()
+
+  if (fetchErr || !persona) return { success: false, error: 'Persona no encontrada' }
+  if (!persona.auth_user_id) return { success: false, error: 'Esta persona aún no ha sido invitada. Usa "Invitar".' }
+  if (!persona.email_corporativo) return { success: false, error: 'La persona no tiene email corporativo' }
+
+  const admin = createAdminClient()
+
+  // Comprobar que el usuario auth no ha confirmado todavía
+  const { data: authData, error: authErr } = await admin.auth.admin.getUserById(persona.auth_user_id)
+  if (authErr || !authData?.user) return { success: false, error: 'No se pudo leer el estado de la cuenta auth' }
+  if (authData.user.email_confirmed_at) {
+    return { success: false, error: 'Esta persona ya ha aceptado la invitación. Usa "Reset password" si no recuerda su contraseña.' }
+  }
+
+  // Borrar el usuario auth previo y volver a invitar (Supabase no permite reinvitar al mismo email)
+  const { error: delErr } = await admin.auth.admin.deleteUser(persona.auth_user_id)
+  if (delErr) return { success: false, error: `Error al limpiar cuenta previa: ${delErr.message}` }
+
+  const { data: invited, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(
+    persona.email_corporativo,
+    {
+      data: { persona_nombre: persona.persona },
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/auth/callback?type=invite`,
+    }
+  )
+
+  if (inviteErr || !invited?.user) {
+    const detail = inviteErr ? `${inviteErr.message} (status: ${inviteErr.status})` : 'Error al reinvitar'
+    return { success: false, error: detail }
+  }
+
+  // Vincular el nuevo auth_user_id
+  const { error: linkErr } = await admin
+    .from('personas')
+    .update({ auth_user_id: invited.user.id })
+    .eq('id', personaId)
+
+  if (linkErr) return { success: false, error: `Invitación reenviada pero error al vincular: ${linkErr.message}` }
+
+  revalidatePath('/usuarios')
+  void registrarAuditoria({ persona: autorizado, accion: 'otro', tabla: 'usuarios', registroId: personaId, datosExtra: { accion: 'reenviar_invitacion' } })
+  return { success: true }
+}
+
+/**
  * Resetear contraseña: envía email de reset al email corporativo.
  * Usa resetPasswordForEmail que sí envía el email automáticamente.
  */

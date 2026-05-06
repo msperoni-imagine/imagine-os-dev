@@ -28,6 +28,7 @@ export const ROLES_COORDINADOR_O_SUPERIOR = [
   'Fundador',
   'Socio',
   'Administrador',
+  'Desarrollador',
 ] as const
 
 export function esCoordinadorOSuperior(rolNombre: string): boolean {

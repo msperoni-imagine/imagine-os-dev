@@ -13,25 +13,29 @@ import {
 import { Button } from '@/components/ui/button'
 import {
   invitarUsuario,
+  reenviarInvitacion,
   desactivarUsuario,
   reactivarUsuario,
   resetearPassword,
   eliminarCuentaAuth,
   cambiarRol,
 } from './actions'
-import { Send, Ban, RotateCcw, KeyRound, Trash2, Loader2, Check, AlertCircle } from 'lucide-react'
+import { Send, Ban, RotateCcw, KeyRound, Trash2, Loader2, Check, AlertCircle, MailWarning } from 'lucide-react'
 
 // ── Estado de acceso derivado ──
 
-type EstadoAcceso = 'Sin cuenta' | 'Activo' | 'Desactivado'
+type EstadoAcceso = 'Sin cuenta' | 'Pendiente' | 'Activo' | 'Desactivado'
 
-function getEstadoAcceso(p: Persona): EstadoAcceso {
+function getEstadoAcceso(p: Persona, pendientesSet: Set<string>): EstadoAcceso {
   if (!p.auth_user_id) return 'Sin cuenta'
-  return p.activo ? 'Activo' : 'Desactivado'
+  if (!p.activo) return 'Desactivado'
+  if (pendientesSet.has(p.auth_user_id)) return 'Pendiente'
+  return 'Activo'
 }
 
 const ESTADO_COLORS: Record<EstadoAcceso, string> = {
   'Activo': 'bg-emerald-50 text-emerald-700',
+  'Pendiente': 'bg-amber-50 text-amber-700',
   'Sin cuenta': 'bg-gray-100 text-gray-600',
   'Desactivado': 'bg-red-50 text-red-700',
 }
@@ -143,9 +147,11 @@ type Props = {
   departamentos: Departamento[]
   divisiones: Division[]
   personasDepartamentos: PersonaDepartamento[]
+  authIdsPendientes: string[]
 }
 
-export default function UsuariosClient({ personas, empresasGrupo, roles, departamentos, divisiones, personasDepartamentos }: Props) {
+export default function UsuariosClient({ personas, empresasGrupo, roles, departamentos, divisiones, personasDepartamentos, authIdsPendientes }: Props) {
+  const pendientesSet = useMemo(() => new Set(authIdsPendientes), [authIdsPendientes])
   const [search, setSearch] = useState('')
   const [estadoFilter, setEstadoFilter] = useState<string[]>([])
   const [empresaFilter, setEmpresaFilter] = useState('Todos')
@@ -189,7 +195,7 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
   const filtered = personas.filter((p) => {
     const q = search.toLowerCase()
     if (q && !p.persona.toLowerCase().includes(q) && !(p.email_corporativo ?? '').toLowerCase().includes(q)) return false
-    if (estadoFilter.length > 0 && !estadoFilter.includes(getEstadoAcceso(p))) return false
+    if (estadoFilter.length > 0 && !estadoFilter.includes(getEstadoAcceso(p, pendientesSet))) return false
     if (empresaFilter !== 'Todos' && egMap.get(p.empresa_grupo_id)?.codigo !== empresaFilter) return false
     if (rolFilter !== 'Todos' && rolMap.get(p.rol_id)?.nombre !== rolFilter) return false
     if (divisionFilter !== 'Todos' && divisionMap.get(p.division_id)?.nombre !== divisionFilter) return false
@@ -201,8 +207,8 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
     return true
   })
 
-  const totalConCuenta = personas.filter((p) => p.auth_user_id).length
-  const totalActivos = personas.filter((p) => p.auth_user_id && p.activo).length
+  const totalActivos = personas.filter((p) => p.auth_user_id && p.activo && !pendientesSet.has(p.auth_user_id)).length
+  const totalPendientes = personas.filter((p) => p.auth_user_id && p.activo && pendientesSet.has(p.auth_user_id)).length
   const totalSinCuenta = personas.filter((p) => !p.auth_user_id).length
 
   return (
@@ -214,9 +220,9 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
 
       <div className="mt-5 grid grid-cols-4 gap-4">
         <KpiCard label="Personas" value={personas.length} borderColor="border-t-blue-500" />
-        <KpiCard label="Con cuenta" value={totalConCuenta} borderColor="border-t-emerald-500" />
-        <KpiCard label="Activos" value={totalActivos} borderColor="border-t-indigo-500" />
-        <KpiCard label="Sin cuenta" value={totalSinCuenta} borderColor="border-t-amber-500" />
+        <KpiCard label="Activos" value={totalActivos} borderColor="border-t-emerald-500" />
+        <KpiCard label="Pendientes" value={totalPendientes} borderColor="border-t-amber-500" />
+        <KpiCard label="Sin cuenta" value={totalSinCuenta} borderColor="border-t-gray-400" />
       </div>
 
       <FilterBar className="mt-5">
@@ -227,6 +233,7 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
           label="Estado"
           options={[
             { value: 'Activo', label: 'Activo' },
+            { value: 'Pendiente', label: 'Pendiente' },
             { value: 'Sin cuenta', label: 'Sin cuenta' },
             { value: 'Desactivado', label: 'Desactivado' },
           ]}
@@ -258,7 +265,7 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
             </TableHeader>
             <TableBody>
               {filtered.map((p) => {
-                const estado = getEstadoAcceso(p)
+                const estado = getEstadoAcceso(p, pendientesSet)
                 const eg = egMap.get(p.empresa_grupo_id)
 
                 return (
@@ -281,6 +288,13 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
                             icon={Send}
                             label="Invitar"
                             onClick={() => invitarUsuario(p.id)}
+                          />
+                        )}
+                        {estado === 'Pendiente' && (
+                          <ActionButton
+                            icon={MailWarning}
+                            label="Reenviar invitación"
+                            onClick={() => reenviarInvitacion(p.id)}
                           />
                         )}
                         {estado === 'Activo' && (

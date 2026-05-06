@@ -271,7 +271,7 @@ export function PersonaFormSheet({
               <Label>Rol *</Label>
               <SearchableSelect
                 options={(() => {
-                  const ORDEN_ROLES = ['Miembro', 'Responsable', 'Coordinador', 'Intern', 'Externo', 'Implant', 'Director', 'Administrador', 'Socio', 'Fundador']
+                  const ORDEN_ROLES = ['Miembro', 'Responsable', 'Coordinador', 'Intern', 'Externo', 'Implant', 'Director', 'Administrador', 'Socio', 'Fundador', 'Desarrollador']
                   return [...roles]
                     .sort((a, b) => {
                       const ia = ORDEN_ROLES.indexOf(a.nombre)

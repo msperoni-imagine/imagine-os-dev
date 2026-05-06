@@ -13,7 +13,7 @@ import type { ActionResult } from '@/lib/types/action-result'
 import { registrarAuditoria } from '@/lib/supabase/audit'
 
 const ERROR_SIN_PERMISO = 'No tienes permiso para esta acción'
-const ROLES_DIRECTOR_O_SUPERIOR = ['Director', 'Socio', 'Administrador', 'Fundador']
+const ROLES_DIRECTOR_O_SUPERIOR = ['Director', 'Socio', 'Administrador', 'Fundador', 'Desarrollador']
 
 function revalidateProyectos(id?: string) {
   revalidatePath('/proyectos')
