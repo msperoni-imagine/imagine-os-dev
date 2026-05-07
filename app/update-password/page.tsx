@@ -25,12 +25,21 @@ export default function UpdatePasswordPage() {
 
     setLoading(true)
 
+    // Asegurar que hay una sesión activa antes de actualizar
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      setError('La sesión ha caducado. Pide una nueva invitación o un nuevo enlace.')
+      setLoading(false)
+      return
+    }
+
     const { error: updateError } = await supabase.auth.updateUser({
       password,
     })
 
     if (updateError) {
-      setError('No se pudo actualizar la contraseña. Inténtalo de nuevo.')
+      console.error('[update-password] updateUser error:', updateError)
+      setError(updateError.message || 'No se pudo actualizar la contraseña. Inténtalo de nuevo.')
       setLoading(false)
       return
     }

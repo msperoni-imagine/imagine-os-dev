@@ -42,7 +42,7 @@ const ESTADO_COLORS: Record<EstadoAcceso, string> = {
 
 function EstadoBadge({ estado }: { estado: EstadoAcceso }) {
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${ESTADO_COLORS[estado]}`}>
+    <span className={`inline-flex min-w-[100px] justify-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${ESTADO_COLORS[estado]}`}>
       {estado}
     </span>
   )
@@ -56,12 +56,14 @@ function ActionButton({
   confirmLabel,
   onClick,
   variant = 'ghost',
+  iconOnly = false,
 }: {
   icon: typeof Send
   label: string
   confirmLabel?: string
   onClick: () => Promise<{ success: boolean; error?: string }>
   variant?: 'ghost' | 'outline'
+  iconOnly?: boolean
 }) {
   const [status, setStatus] = useState<'idle' | 'confirming' | 'loading' | 'done' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -86,13 +88,14 @@ function ActionButton({
   }
 
   const isConfirming = status === 'confirming'
+  const showText = !iconOnly || isConfirming || status === 'done' || status === 'error'
 
   return (
     <div className="relative">
       <Button
         variant={variant}
-        size="sm"
-        className={`gap-1.5 text-xs ${isConfirming ? 'text-destructive' : ''}`}
+        size={iconOnly && !showText ? 'icon' : 'sm'}
+        className={`gap-1.5 text-xs ${isConfirming ? 'text-destructive' : ''} ${iconOnly && !showText ? 'h-8 w-8' : ''}`}
         onClick={handleClick}
         disabled={status === 'loading'}
         title={isConfirming ? confirmLabel : label}
@@ -106,7 +109,7 @@ function ActionButton({
         ) : (
           <Icon className="h-3.5 w-3.5" />
         )}
-        {isConfirming ? confirmLabel : status === 'done' ? 'Hecho' : status === 'error' ? errorMsg : label}
+        {showText && (isConfirming ? confirmLabel : status === 'done' ? 'Hecho' : status === 'error' ? errorMsg : label)}
       </Button>
     </div>
   )
@@ -129,7 +132,7 @@ function RolSelect({ persona, roles }: { persona: Persona; roles: Rol[] }) {
       value={persona.rol_id}
       onChange={(e) => handleChange(e.target.value)}
       disabled={loading}
-      className="h-7 rounded-md border border-input bg-transparent px-2 text-xs outline-none focus:border-ring disabled:opacity-50"
+      className="h-7 w-full rounded-md border border-input bg-transparent px-2 text-xs outline-none focus:border-ring disabled:opacity-50"
     >
       {roles.map((r) => (
         <option key={r.id} value={r.id}>{r.nombre}</option>
@@ -252,15 +255,15 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
             No se encontraron usuarios con esos filtros.
           </p>
         ) : (
-          <Table>
+          <Table className="table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs uppercase text-muted-foreground">Persona</TableHead>
+                <TableHead className="w-[220px] text-xs uppercase text-muted-foreground">Persona</TableHead>
                 <TableHead className="text-xs uppercase text-muted-foreground">Email</TableHead>
-                <TableHead className="text-xs uppercase text-muted-foreground">Empresa</TableHead>
-                <TableHead className="text-xs uppercase text-muted-foreground">Rol</TableHead>
-                <TableHead className="text-xs uppercase text-muted-foreground">Acceso</TableHead>
-                <TableHead className="text-xs uppercase text-muted-foreground">Acciones</TableHead>
+                <TableHead className="w-[100px] text-center text-xs uppercase text-muted-foreground">Empresa</TableHead>
+                <TableHead className="w-[160px] text-xs uppercase text-muted-foreground">Rol</TableHead>
+                <TableHead className="w-[120px] text-center text-xs uppercase text-muted-foreground">Acceso</TableHead>
+                <TableHead className="w-[160px] text-center text-xs uppercase text-muted-foreground">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -271,18 +274,18 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
                 return (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.persona}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
+                    <TableCell className="truncate text-muted-foreground text-sm" title={p.email_corporativo ?? ''}>
                       {p.email_corporativo ?? <span className="italic">Sin email</span>}
                     </TableCell>
-                    <TableCell>{eg?.codigo ?? '—'}</TableCell>
+                    <TableCell className="text-center">{eg?.codigo ?? '—'}</TableCell>
                     <TableCell>
                       <RolSelect persona={p} roles={roles} />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       <EstadoBadge estado={estado} />
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center justify-center gap-1">
                         {estado === 'Sin cuenta' && p.email_corporativo && (
                           <ActionButton
                             icon={Send}
@@ -302,12 +305,14 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
                             <ActionButton
                               icon={KeyRound}
                               label="Reset password"
+                              iconOnly
                               onClick={() => resetearPassword(p.id)}
                             />
                             <ActionButton
                               icon={Ban}
                               label="Desactivar"
                               confirmLabel="¿Confirmar?"
+                              iconOnly
                               onClick={() => desactivarUsuario(p.id)}
                             />
                           </>
@@ -317,12 +322,14 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
                             <ActionButton
                               icon={RotateCcw}
                               label="Reactivar"
+                              iconOnly
                               onClick={() => reactivarUsuario(p.id)}
                             />
                             <ActionButton
                               icon={Trash2}
                               label="Eliminar cuenta"
                               confirmLabel="¿Seguro?"
+                              iconOnly
                               onClick={() => eliminarCuentaAuth(p.id)}
                             />
                           </>

@@ -29,7 +29,15 @@ function AuthCallbackHandler() {
       if (code) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
         if (exchangeError) {
-          router.replace('/login?error=enlace-invalido')
+          console.error('[auth/callback] exchangeCodeForSession error:', exchangeError)
+          setError(exchangeError.message || 'El enlace no es válido o ha caducado.')
+          return
+        }
+
+        // Esperar a que la sesión esté disponible (a veces tarda un tick en sincronizarse)
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+          setError('No se pudo establecer la sesión. Pide un enlace nuevo.')
           return
         }
 
