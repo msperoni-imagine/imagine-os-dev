@@ -258,12 +258,12 @@ export default function UsuariosClient({ personas, empresasGrupo, roles, departa
           <Table className="table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[220px] text-xs uppercase text-muted-foreground">Persona</TableHead>
-                <TableHead className="text-xs uppercase text-muted-foreground">Email</TableHead>
-                <TableHead className="w-[100px] text-center text-xs uppercase text-muted-foreground">Empresa</TableHead>
-                <TableHead className="w-[160px] text-xs uppercase text-muted-foreground">Rol</TableHead>
-                <TableHead className="w-[120px] text-center text-xs uppercase text-muted-foreground">Acceso</TableHead>
-                <TableHead className="w-[160px] text-center text-xs uppercase text-muted-foreground">Acciones</TableHead>
+                <TableHead className="w-[220px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Persona</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Email</TableHead>
+                <TableHead className="w-[100px] text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">Empresa</TableHead>
+                <TableHead className="w-[160px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Rol</TableHead>
+                <TableHead className="w-[120px] text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">Acceso</TableHead>
+                <TableHead className="w-[160px] text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

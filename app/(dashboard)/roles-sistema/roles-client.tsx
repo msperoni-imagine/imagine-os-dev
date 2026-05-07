@@ -177,22 +177,19 @@ export function RolesClient({ roles }: Props) {
       </div>
 
       {/* Tabla */}
-      <div className="mt-6 rounded-xl bg-white shadow-sm">
+      <div className="mt-5 rounded-xl bg-white p-4 shadow-sm">
         {roles.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-sm font-medium text-foreground">Aún no hay roles</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Crea el primer rol usando el botón de arriba.
-            </p>
-          </div>
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            Aún no hay roles. Crea el primero usando el botón de arriba.
+          </p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs uppercase text-muted-foreground">Nombre</TableHead>
-                <TableHead className="text-xs uppercase text-muted-foreground">Nivel acceso</TableHead>
-                <TableHead className="text-xs uppercase text-muted-foreground">Descripción</TableHead>
-                <TableHead className="text-xs uppercase text-muted-foreground w-20 text-right">
+                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nombre</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nivel acceso</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Descripción</TableHead>
+                <TableHead className="w-20 text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Acciones
                 </TableHead>
               </TableRow>
@@ -202,7 +199,7 @@ export function RolesClient({ roles }: Props) {
                 <TableRow key={rol.id}>
                   <TableCell className="font-medium">{rol.nombre}</TableCell>
                   <TableCell>
-                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                    <span className={`inline-flex min-w-[90px] justify-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                       rol.nivel_acceso === 'global' ? 'bg-emerald-50 text-emerald-700' :
                       rol.nivel_acceso === 'empresa' ? 'bg-blue-50 text-blue-700' :
                       'bg-gray-100 text-gray-600'
